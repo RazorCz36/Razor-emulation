@@ -82,12 +82,41 @@ elseif(LINUX)
 	set_target_properties(launcher PROPERTIES LINK_FLAGS "${KYTY_LD_OPTIONS}")
 endif()
 
+set(launcher_name "razor_launcher")
+if(APPLE)
+	set(launcher_name "RazorEmulations")
+endif()
+
+set_target_properties(launcher PROPERTIES OUTPUT_NAME ${launcher_name})
+
+if(APPLE)
+	# macOS bundle: RazorEmulations.app with launcher as main executable and
+	# razor_emulator as helper inside Contents/MacOS. MoltenVK is found
+	# next to a flat executable or in the bundle's Contents/Frameworks;
+	# no rpath fixup is needed because SDL loads it by absolute path.
+	# Qt deployment (Frameworks + plugins) is handled by macdeployqt.
+	set_target_properties(launcher PROPERTIES
+		MACOSX_BUNDLE TRUE
+		MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
+		INSTALL_RPATH "@executable_path/../Frameworks"
+		BUILD_WITH_INSTALL_RPATH TRUE
+	)
+	set(razor_stage_store_dir "$<TARGET_BUNDLE_CONTENT_DIR:launcher>/Resources/store")
+else()
+	set(razor_stage_store_dir "$<TARGET_FILE_DIR:launcher>/store")
+endif()
+
 add_custom_target(stage_updater
 	COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:launcher>
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:kyty_updater>
 		$<TARGET_FILE_DIR:launcher>/$<TARGET_FILE_NAME:kyty_updater>
-	COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/store"
-		$<TARGET_FILE_DIR:launcher>/store
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${razor_stage_store_dir}
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/store/catalog.json"
+		${razor_stage_store_dir}/catalog.json
+	COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/store/icons"
+		${razor_stage_store_dir}/icons
+	COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/store/packages"
+		${razor_stage_store_dir}/packages
 	DEPENDS kyty_updater
 	VERBATIM)
 add_dependencies(launcher kyty_emulator stage_updater)
@@ -117,27 +146,6 @@ if(WIN32)
 	)
 endif()
 
-set(launcher_name "razor_launcher")
-if(APPLE)
-	set(launcher_name "RazorEmulations")
-endif()
-
-set_target_properties(launcher PROPERTIES OUTPUT_NAME ${launcher_name})
-
-if(APPLE)
-	# macOS bundle: RazorEmulations.app with launcher as main executable and
-	# razor_emulator as helper inside Contents/MacOS. MoltenVK is found
-	# next to a flat executable or in the bundle's Contents/Frameworks;
-	# no rpath fixup is needed because SDL loads it by absolute path.
-	# Qt deployment (Frameworks + plugins) is handled by macdeployqt.
-	set_target_properties(launcher PROPERTIES
-		MACOSX_BUNDLE TRUE
-		MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
-		INSTALL_RPATH "@executable_path/../Frameworks"
-		BUILD_WITH_INSTALL_RPATH TRUE
-	)
-endif()
-
 install(TARGETS launcher
 	BUNDLE DESTINATION .
 	RUNTIME DESTINATION .)
@@ -148,7 +156,8 @@ if(APPLE)
 	install(FILES "${KYTY_TROPHY_UNLOCK_SOUND}" DESTINATION "RazorEmulations.app/Contents/Resources/assets/sounds")
 	install(FILES ${KYTY_NOTO_SANS_FONTS} DESTINATION "RazorEmulations.app/Contents/Resources/assets/fonts")
 	install(DIRECTORY "${CMAKE_SOURCE_DIR}/assets/cursors" DESTINATION "RazorEmulations.app/Contents/Resources/assets")
-	install(DIRECTORY "${CMAKE_SOURCE_DIR}/store" DESTINATION "RazorEmulations.app/Contents/Resources")
+	install(DIRECTORY "${CMAKE_SOURCE_DIR}/store" DESTINATION "RazorEmulations.app/Contents/Resources"
+		PATTERN "*.ps1" EXCLUDE)
 	# Deploy and ad-hoc sign the Qt frameworks and plugins in the bundle.
 	find_program(KYTY_MACDEPLOYQT NAMES macdeployqt PATHS "${Qt6_DIR}/../../../bin" NO_DEFAULT_PATH)
 	if(NOT KYTY_MACDEPLOYQT)
