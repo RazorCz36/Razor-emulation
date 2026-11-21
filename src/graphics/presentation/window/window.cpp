@@ -953,6 +953,12 @@ void WindowContext::UpdateIcon() {
 		std::filesystem::path icon_path;
 		if (Loader::SystemContentGetIconPath(&icon_path)) {
 			WindowLoadPngIcon(icon_path, &icon);
+		} else if (const char* base_path = SDL_GetBasePath(); base_path != nullptr) {
+			const auto fallback_icon =
+			    std::filesystem::path(base_path) / "assets" / "icons" / "razor_window_icon.png";
+			if (Common::File::IsFileExisting(fallback_icon)) {
+				WindowLoadPngIcon(fallback_icon, &icon);
+			}
 		}
 		icon_loaded = true;
 	}

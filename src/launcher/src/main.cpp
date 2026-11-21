@@ -47,9 +47,10 @@ int main(int argc, char* argv[]) {
 	QCoreApplication::setApplicationName(QStringLiteral("RazorEmulations"));
 	QGuiApplication::setApplicationDisplayName(QStringLiteral("RazorEmulations"));
 
-	// Title bars and taskbars get the bolder small-size artwork.
-	const QIcon small_art(QStringLiteral(":/icons/kyty-small.svg"));
-	const QIcon large_art(QStringLiteral(":/icons/kyty.svg"));
+	// Title bars and taskbars get the sharpened small-size RoG Razor emblem,
+	// while high-DPI docks/Alt-Tab get the full-detail 256px Gunmetal badge.
+	const QIcon small_art(QStringLiteral(":/icons/razor-logo-small.png"));
+	const QIcon large_art(QStringLiteral(":/icons/razor-logo.png"));
 	QIcon       icon;
 	for (int size: {16, 24, 32, 48, 64}) {
 		icon.addPixmap(small_art.pixmap(QSize(size, size), 1.0));

@@ -41,6 +41,7 @@ if (NOT (WIN32 OR LINUX OR APPLE))
 endif()
 
 if(WIN32)
+	enable_language(RC)
 	# Prevent Windows headers from defining min/max macros in all targets.
 	add_compile_definitions(NOMINMAX)
 endif()
@@ -915,6 +916,19 @@ endif()
 add_executable(kyty_emulator "${KYTY_SOURCE_DIR}/main.cpp" ${kyty_emulator_src})
 set_target_properties(kyty_emulator PROPERTIES OUTPUT_NAME "razor_emulator")
 configure_macos_guest_address_space(kyty_emulator)
+if(WIN32)
+	target_sources(kyty_emulator PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/assets/icons/razor_app.rc")
+	target_include_directories(kyty_emulator PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/assets/icons")
+endif()
+
+set(RAZOR_WINDOW_ICON "${CMAKE_CURRENT_SOURCE_DIR}/assets/icons/razor_window_icon.png")
+add_custom_target(razor_window_icon
+	COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:kyty_emulator>/assets/icons"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different "${RAZOR_WINDOW_ICON}"
+		"$<TARGET_FILE_DIR:kyty_emulator>/assets/icons/razor_window_icon.png"
+	VERBATIM)
+add_dependencies(kyty_emulator razor_window_icon)
+install(FILES "${RAZOR_WINDOW_ICON}" DESTINATION assets/icons)
 
 set(KYTY_TROPHY_UNLOCK_SOUND "${CMAKE_CURRENT_SOURCE_DIR}/assets/sounds/trophy-unlock.wav")
 add_custom_target(kyty_trophy_sound

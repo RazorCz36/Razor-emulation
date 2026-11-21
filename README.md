@@ -1,6 +1,10 @@
-# RazorEmulations
+<p align="center">
+  <img src="docs/logo.png" width="176" alt="RoG Razor — RazorEmulations App Emblem" />
+</p>
 
-**RazorEmulations** is an open-source PlayStation 5 translation layer and desktop suite written in C++20 and Vulkan 1.3 for **Windows 11 x64** (with Linux and experimental macOS support). Engineered for high-frequency hybrid desktop processors and discrete PC GPUs, it features a custom **Gunmetal Grey Luxury** Qt 6 command deck and native **PC Resolution Scaling (`1080p` FHD, `1440p` WQHD, `4K` UHD)**.
+<h1 align="center">RazorEmulations</h1>
+
+**RazorEmulations** is an open-source PlayStation 5 translation layer and desktop suite written in C++20 and Vulkan 1.3 for **Windows 11 x64** (with Linux and experimental macOS support). Engineered for high-frequency hybrid desktop processors and discrete PC GPUs, it features a custom **Gunmetal Grey Luxury** Qt 6 command deck, the **RoG Razor** insignia, and native **PC Resolution Scaling (`1080p` FHD, `1440p` WQHD, `4K` UHD)**.
 
 ![RazorEmulations — Gunmetal Grey Luxury Grid View](docs/preview_grid.png)
 ![RazorEmulations — Gunmetal Grey Luxury List View](docs/preview_list.png)

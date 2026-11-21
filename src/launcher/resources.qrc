@@ -9,6 +9,8 @@
   <file alias="trophy.svg">icons/trophy.svg</file>
   <file alias="kyty.svg">icons/kyty.svg</file>
   <file alias="kyty-small.svg">icons/kyty-small.svg</file>
+  <file alias="razor-logo.png">icons/razor-logo.png</file>
+  <file alias="razor-logo-small.png">icons/razor-logo-small.png</file>
   <file alias="hidden-trophy.png">../../assets/images/hidden-trophy.png</file>
  </qresource>
  <qresource prefix="/styles">

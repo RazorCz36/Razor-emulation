@@ -161,8 +161,8 @@ void MainDialogPrivate::Setup(MainDialog* main_dialog) {
 	m_ui->setupUi(main_dialog);
 	m_ui->widget->SetControllerPreview(&m_controller_preview);
 
-	const QIcon brand_icon(QStringLiteral(":/icons/kyty.svg"));
-	m_ui->brand_icon_label->setPixmap(brand_icon.pixmap(QSize(44, 44), main_dialog->devicePixelRatioF()));
+	const QIcon brand_icon(QStringLiteral(":/icons/razor-logo.png"));
+	m_ui->brand_icon_label->setPixmap(brand_icon.pixmap(QSize(48, 48), main_dialog->devicePixelRatioF()));
 
 	m_main_dialog    = main_dialog;
 	m_update_checker = new UpdateChecker(main_dialog);

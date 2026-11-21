@@ -652,6 +652,13 @@ public:
 		header_layout->setContentsMargins(14, 10, 14, 10);
 		header_layout->setSpacing(12);
 
+		auto* store_logo_label = new QLabel(header_frame);
+		store_logo_label->setFixedSize(44, 44);
+		const QIcon store_brand_icon(QStringLiteral(":/icons/razor-logo.png"));
+		store_logo_label->setPixmap(
+		    store_brand_icon.pixmap(QSize(44, 44), dialog->devicePixelRatioF()));
+		header_layout->addWidget(store_logo_label);
+
 		auto* title_col = new QVBoxLayout();
 		title_col->setSpacing(2);
 		auto* store_title = new QLabel(tr("✦  RAZOR STORE  ·  DIRECT AUTO-INSTALL HUB"), header_frame);

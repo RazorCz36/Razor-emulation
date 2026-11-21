@@ -10,6 +10,7 @@
 	<key>CFBundlePackageType</key><string>APPL</string>
 	<key>CFBundleSignature</key><string>????</string>
 	<key>CFBundleExecutable</key><string>RazorEmulations</string>
+	<key>CFBundleIconFile</key><string>RazorEmulations.icns</string>
 	<key>LSMinimumSystemVersion</key><string>13.0</string>
 	<key>NSHighResolutionCapable</key><true/>
 	<key>NSRequiresAquaSystemAppearance</key><false/>
