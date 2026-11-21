@@ -1,0 +1,356 @@
+/* ============================================================================
+   RazorEmulations — Gunmetal Grey Luxury Interface Stylesheet
+   Note: cfgs_list and cfgs_grid intentionally preserve their own transparent
+   view background from configuration_list_widget.ui so PS5 hero art (pic0.png)
+   renders seamlessly behind both list and grid views.
+   ============================================================================ */
+
+QFrame#razor_header_frame {
+    background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1,
+                                stop: 0 palette(button),
+                                stop: 1 palette(window));
+    border: 1px solid palette(mid);
+    border-radius: 8px;
+}
+
+QFrame#razor_footer_frame {
+    background: palette(base);
+    border: 1px solid palette(mid);
+    border-radius: 6px;
+}
+
+QLabel#brand_title_label {
+    color: palette(window-text);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+}
+
+QLabel#brand_subtitle_label {
+    color: palette(placeholder-text);
+    font-size: 11px;
+}
+
+QLabel#pc_resolution_caption {
+    color: palette(window-text);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+QLabel#resolution_hint_label {
+    color: palette(link);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+QComboBox#pc_resolution_combo {
+    background: palette(base);
+    border: 1px solid palette(highlight);
+    border-radius: 6px;
+    color: palette(text);
+    font-weight: 600;
+    padding: 5px 12px;
+    min-height: 24px;
+}
+
+QComboBox#pc_resolution_combo:hover {
+    background: palette(button);
+}
+
+QPushButton#launch_game_button {
+    background: palette(highlight);
+    border: 1px solid palette(highlight);
+    border-radius: 6px;
+    color: palette(highlighted-text);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 7px 18px;
+    min-height: 24px;
+}
+
+QPushButton#launch_game_button:hover {
+    background: palette(link);
+    border-color: palette(link);
+}
+
+QPushButton#launch_game_button:pressed {
+    background: palette(midlight);
+    color: palette(text);
+}
+
+QPushButton#launch_game_button:disabled {
+    background: palette(button);
+    border-color: palette(mid);
+    color: palette(placeholder-text);
+}
+
+QGroupBox {
+    border: 1px solid palette(mid);
+    border-radius: 6px;
+    margin-top: 10px;
+    padding-top: 8px;
+    font-weight: 600;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 10px;
+    padding: 0 5px;
+    color: palette(link);
+}
+
+QTreeWidget#cfgs_list,
+QListView#cfgs_grid {
+    border: 1px solid palette(mid);
+    border-radius: 6px;
+    color: palette(text);
+    outline: 0;
+}
+
+QTreeWidget#cfgs_list::item {
+    background: transparent;
+    border-bottom: 1px solid palette(mid);
+    padding: 5px 4px;
+}
+
+QTreeWidget#cfgs_list::item:hover {
+    background: rgba(200, 162, 86, 0.12);
+}
+
+QTreeWidget#cfgs_list::item:selected {
+    background: palette(highlight);
+    color: palette(highlighted-text);
+}
+
+QTreeWidget#cfgs_list QHeaderView::section {
+    background: palette(button);
+    color: palette(button-text);
+    border: 0;
+    border-right: 1px solid palette(mid);
+    border-bottom: 1px solid palette(mid);
+    font-weight: 600;
+    padding: 6px 8px;
+}
+
+QLineEdit,
+QSpinBox,
+QComboBox {
+    background: palette(base);
+    border: 1px solid palette(mid);
+    border-radius: 5px;
+    color: palette(text);
+    padding: 4px 8px;
+    selection-background-color: palette(highlight);
+    selection-color: palette(highlighted-text);
+}
+
+QLineEdit:focus,
+QSpinBox:focus,
+QComboBox:focus {
+    border-color: palette(highlight);
+}
+
+QLineEdit#search_line_edit {
+    background: palette(base);
+    border: 1px solid palette(mid);
+    border-radius: 6px;
+    color: palette(text);
+    padding: 5px 10px;
+    selection-background-color: palette(highlight);
+    selection-color: palette(highlighted-text);
+}
+
+QLineEdit#search_line_edit:focus {
+    border-color: palette(highlight);
+}
+
+QPushButton {
+    background: palette(button);
+    border: 1px solid palette(mid);
+    border-radius: 5px;
+    color: palette(button-text);
+    padding: 5px 14px;
+}
+
+QPushButton:hover {
+    background: palette(midlight);
+    border-color: palette(highlight);
+}
+
+QPushButton:pressed {
+    background: palette(base);
+}
+
+QToolButton#grid_view_button,
+QToolButton#refresh_button,
+QToolButton#global_settings_button,
+QToolButton#input_mapping_button,
+QToolButton#edit_button,
+QToolButton#trophy_overview_button,
+QToolButton#delete_button {
+    background: palette(button);
+    border: 1px solid palette(mid);
+    border-radius: 6px;
+    padding: 4px;
+}
+
+QToolButton#grid_view_button:hover,
+QToolButton#refresh_button:hover,
+QToolButton#global_settings_button:hover,
+QToolButton#input_mapping_button:hover,
+QToolButton#edit_button:hover,
+QToolButton#trophy_overview_button:hover,
+QToolButton#delete_button:hover {
+    background: palette(midlight);
+    border-color: palette(highlight);
+}
+
+QToolButton#grid_view_button:checked,
+QToolButton#grid_view_button:pressed,
+QToolButton#refresh_button:pressed,
+QToolButton#global_settings_button:pressed,
+QToolButton#input_mapping_button:pressed,
+QToolButton#edit_button:pressed,
+QToolButton#trophy_overview_button:pressed,
+QToolButton#delete_button:pressed {
+    background: palette(highlight);
+    border-color: palette(highlight);
+}
+
+QComboBox#game_status_editor {
+    background: transparent;
+    border: 0;
+    color: palette(text);
+    padding-left: 2px;
+}
+
+QComboBox#game_status_editor:focus {
+    background: palette(button);
+    border-radius: 3px;
+}
+
+QComboBox#game_status_editor::drop-down {
+    border: 0;
+}
+
+QComboBox QAbstractItemView {
+    background: palette(base);
+    border: 1px solid palette(mid);
+    color: palette(text);
+    selection-background-color: palette(highlight);
+    selection-color: palette(highlighted-text);
+}
+
+QLineEdit#game_comment_editor {
+    background: transparent;
+    border: 0;
+    color: palette(text);
+    padding-left: 2px;
+    selection-background-color: palette(highlight);
+    selection-color: palette(highlighted-text);
+}
+
+QLineEdit#game_comment_editor:focus {
+    background: palette(base);
+    border: 1px solid palette(mid);
+    border-radius: 3px;
+}
+
+QLabel#game_status_indicator {
+    border: 1px solid palette(base);
+    border-radius: 6px;
+}
+
+QTabWidget::pane {
+    border: 1px solid palette(mid);
+    border-radius: 6px;
+}
+
+QTabBar::tab {
+    background: palette(button);
+    border: 1px solid palette(mid);
+    border-bottom: 0;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    color: palette(button-text);
+    padding: 6px 14px;
+    margin-right: 2px;
+}
+
+QTabBar::tab:selected {
+    background: palette(window);
+    border-color: palette(highlight);
+    color: palette(link);
+    font-weight: 600;
+}
+
+QCheckBox {
+    spacing: 7px;
+    color: palette(window-text);
+}
+
+QCheckBox::indicator {
+    width: 15px;
+    height: 15px;
+    border-radius: 4px;
+    background: palette(base);
+    border: 1px solid #4A5568;
+}
+
+QCheckBox::indicator:hover {
+    border-color: palette(highlight);
+}
+
+QCheckBox::indicator:checked {
+    background: palette(highlight);
+    border: 1px solid palette(link);
+}
+
+QScrollBar:horizontal {
+    background: palette(base);
+    height: 10px;
+    margin: 0px;
+    border-top: 1px solid palette(mid);
+}
+
+QScrollBar::handle:horizontal {
+    background: #343D4B;
+    min-width: 36px;
+    border-radius: 4px;
+    margin: 2px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: palette(highlight);
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+QScrollBar:vertical {
+    background: palette(base);
+    width: 10px;
+    margin: 0px;
+    border-left: 1px solid palette(mid);
+}
+
+QScrollBar::handle:vertical {
+    background: #343D4B;
+    min-height: 36px;
+    border-radius: 4px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: palette(highlight);
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
