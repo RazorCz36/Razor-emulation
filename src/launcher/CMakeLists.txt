@@ -57,6 +57,24 @@ target_link_libraries(launcher_cheat_tests Qt6::Network FFmpeg::ffmpeg kyty_test
 target_include_directories(launcher_cheat_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set_target_properties(launcher_cheat_tests PROPERTIES AUTOMOC ON)
 
+add_executable(razor_zar_packer EXCLUDE_FROM_ALL
+	"${CMAKE_SOURCE_DIR}/tools/prospero_homebrew/zar_pack_tool.cpp"
+)
+target_link_libraries(razor_zar_packer common)
+target_include_directories(razor_zar_packer PRIVATE "${KYTY_SOURCE_DIR}")
+
+add_executable(launcher_store_tests EXCLUDE_FROM_ALL
+	"${KYTY_TESTS_DIR}/LauncherStoreTests.cpp"
+	include/razorStoreDialog.h
+	src/razorStoreDialog.cpp
+	src/gameContent.cpp
+	"${KYTY_SOURCE_DIR}/loader/elf.cpp"
+)
+target_link_libraries(launcher_store_tests Qt6::Network Qt6::Widgets common kyty_test_gtest)
+target_include_directories(launcher_store_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include" "${KYTY_SOURCE_DIR}")
+target_compile_definitions(launcher_store_tests PRIVATE RAZOR_SOURCE_ROOT="${CMAKE_SOURCE_DIR}")
+set_target_properties(launcher_store_tests PROPERTIES AUTOMOC ON)
+
 if(WIN32 AND NOT KYTY_CLANG_CL)
 	set_target_properties(launcher PROPERTIES LINK_FLAGS "${KYTY_LD_OPTIONS}")
 elseif(LINUX)
@@ -68,6 +86,8 @@ add_custom_target(stage_updater
 	COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:launcher>
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:kyty_updater>
 		$<TARGET_FILE_DIR:launcher>/$<TARGET_FILE_NAME:kyty_updater>
+	COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/store"
+		$<TARGET_FILE_DIR:launcher>/store
 	DEPENDS kyty_updater
 	VERBATIM)
 add_dependencies(launcher kyty_emulator stage_updater)
@@ -128,6 +148,7 @@ if(APPLE)
 	install(FILES "${KYTY_TROPHY_UNLOCK_SOUND}" DESTINATION "RazorEmulations.app/Contents/Resources/assets/sounds")
 	install(FILES ${KYTY_NOTO_SANS_FONTS} DESTINATION "RazorEmulations.app/Contents/Resources/assets/fonts")
 	install(DIRECTORY "${CMAKE_SOURCE_DIR}/assets/cursors" DESTINATION "RazorEmulations.app/Contents/Resources/assets")
+	install(DIRECTORY "${CMAKE_SOURCE_DIR}/store" DESTINATION "RazorEmulations.app/Contents/Resources")
 	# Deploy and ad-hoc sign the Qt frameworks and plugins in the bundle.
 	find_program(KYTY_MACDEPLOYQT NAMES macdeployqt PATHS "${Qt6_DIR}/../../../bin" NO_DEFAULT_PATH)
 	if(NOT KYTY_MACDEPLOYQT)
@@ -145,6 +166,7 @@ endif()
 
 if(NOT APPLE)
 	install(TARGETS kyty_updater RUNTIME DESTINATION .)
+	install(DIRECTORY "${CMAKE_SOURCE_DIR}/store" DESTINATION .)
 endif()
 
 if(WIN32)

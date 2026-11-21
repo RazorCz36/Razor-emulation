@@ -7,6 +7,7 @@
 #include "controllerPreview.h"
 #include "gameContent.h"
 #include "launcherTheme.h"
+#include "razorStoreDialog.h"
 #include "titleSound.h"
 #include "updateChecker.h"
 
@@ -197,6 +198,18 @@ void MainDialogPrivate::Setup(MainDialog* main_dialog) {
 	        });
 	connect(m_ui->widget, &ConfigurationListWidget::Run, this, &MainDialogPrivate::Run);
 	connect(m_ui->launch_game_button, &QPushButton::clicked, this, [this]() { Run({}); });
+	connect(m_ui->razor_store_button, &QPushButton::clicked, this, [this]() {
+		RazorStoreDialog store_dlg(m_ui->widget, m_ui->widget->GetSettingsFile(), m_main_dialog);
+		bool             launch_after_close = false;
+		connect(&store_dlg, &RazorStoreDialog::LaunchRequested, &store_dlg,
+		        [&launch_after_close]() { launch_after_close = true; });
+		store_dlg.exec();
+		Update();
+		if (launch_after_close && m_running_games == 0 &&
+		    m_ui->widget->GetSelectedItem() != nullptr) {
+			Run({});
+		}
+	});
 	connect(m_ui->pc_resolution_combo, &QComboBox::currentIndexChanged, this, [this](int index) {
 		g_pc_resolution_mode = qBound(0, index, 3);
 		UpdateResolutionHint();

@@ -2,6 +2,7 @@
 #define CONFIGURATION_LIST_WIDGET_H
 
 #include "configuration.h"
+#include "razorStoreDialog.h"
 
 #include <QMap>
 #include <QString>
@@ -20,7 +21,7 @@ namespace Ui {
 class ConfigurationListWidget;
 } // namespace Ui
 
-class ConfigurationListWidget: public QWidget {
+class ConfigurationListWidget: public QWidget, public IRazorStoreLibrary {
 	Q_OBJECT
 
 public:
@@ -41,10 +42,14 @@ public:
 	[[nodiscard]] std::unique_ptr<Configuration>
 	CreateConfiguration(const ConfigurationItem& item) const;
 
-	bool EnsureGameDirectory();
-	void ScanGameDirectory();
-	void ViewTrophies();
-	void ViewTrophyOverview();
+	bool                                 EnsureGameDirectory();
+	[[nodiscard]] QString                GetPrimaryInstallDirectory() override;
+	[[nodiscard]] QMap<QString, QString> GetInstalledTitleVersions() const override;
+	bool                                 SelectGameByTitleIdOrPath(const QString& title_id,
+	                                                               const QString& installed_path) override;
+	void                                 ScanGameDirectory() override;
+	void                   ViewTrophies();
+	void                   ViewTrophyOverview();
 
 signals:
 

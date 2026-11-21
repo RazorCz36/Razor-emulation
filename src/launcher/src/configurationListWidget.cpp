@@ -636,11 +636,106 @@ bool ConfigurationListWidget::EnsureGameDirectory() {
 		return true;
 	}
 
+	const auto try_create_default_games_dir = [](const QString& base_dir) -> QString {
+		if (base_dir.isEmpty()) {
+			return {};
+		}
+		const QString candidate = QDir::cleanPath(QDir(base_dir).filePath(QStringLiteral("Games")));
+		if (!QDir().mkpath(candidate)) {
+			return {};
+		}
+		QFile probe(QDir(candidate).filePath(QStringLiteral(".razor_write_probe")));
+		if (!probe.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+			return {};
+		}
+		probe.close();
+		probe.remove();
+		return candidate;
+	};
+
+	QString auto_dir = try_create_default_games_dir(m_runtime_directory);
+	if (auto_dir.isEmpty()) {
+		auto_dir = try_create_default_games_dir(QCoreApplication::applicationDirPath());
+	}
+	if (auto_dir.isEmpty()) {
+		auto_dir = try_create_default_games_dir(
+		    QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
+	}
+
+	if (!auto_dir.isEmpty()) {
+		m_game_dirs = QStringList {auto_dir};
+		WriteSettings();
+		ScanGameDirectory();
+		return true;
+	}
+
 	QMessageBox::information(this, tr("Game folders"),
 	                         tr("Add at least one game folder in global settings."));
 	edit_global_settings();
 
 	return HasValidGameDirectory();
+}
+
+QString ConfigurationListWidget::GetPrimaryInstallDirectory() {
+	EnsureGameDirectory();
+	for (const auto& dir: m_game_dirs) {
+		if (dir.isEmpty()) {
+			continue;
+		}
+		QDir qdir(dir);
+		if (!qdir.exists() && !QDir().mkpath(dir)) {
+			continue;
+		}
+		QFile probe(qdir.filePath(QStringLiteral(".razor_store_probe")));
+		if (probe.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+			probe.close();
+			probe.remove();
+			return QDir::cleanPath(qdir.absolutePath());
+		}
+	}
+
+	const QString fallback = QDir::cleanPath(
+	    QDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation))
+	        .filePath(QStringLiteral("Games")));
+	QDir().mkpath(fallback);
+	if (!m_game_dirs.contains(fallback)) {
+		m_game_dirs.prepend(fallback);
+		WriteSettings();
+	}
+	return fallback;
+}
+
+QMap<QString, QString> ConfigurationListWidget::GetInstalledTitleVersions() const {
+	QMap<QString, QString> installed;
+	for (int index = 0; index < m_ui->cfgs_list->topLevelItemCount(); ++index) {
+		const auto* item =
+		    static_cast<const ConfigurationItem*>(m_ui->cfgs_list->topLevelItem(index));
+		const QString tid = item->GetInfo().title_id.trimmed().toUpper();
+		if (!tid.isEmpty()) {
+			installed.insert(tid, item->GetInfo().gameVersion.trimmed());
+		}
+	}
+	return installed;
+}
+
+bool ConfigurationListWidget::SelectGameByTitleIdOrPath(const QString& title_id,
+                                                        const QString& installed_path) {
+	const QString wanted_tid  = title_id.trimmed().toUpper();
+	const QString wanted_path = QDir::cleanPath(installed_path);
+
+	for (int index = 0; index < m_ui->cfgs_list->topLevelItemCount(); ++index) {
+		auto*         item = static_cast<ConfigurationItem*>(m_ui->cfgs_list->topLevelItem(index));
+		const QString tid  = item->GetInfo().title_id.trimmed().toUpper();
+		const QString base = QDir::cleanPath(item->GetInfo().basedir);
+		if ((!wanted_tid.isEmpty() && tid == wanted_tid) ||
+		    (!wanted_path.isEmpty() && base.compare(wanted_path, Qt::CaseInsensitive) == 0)) {
+			m_ui->cfgs_list->setCurrentItem(item);
+			m_ui->cfgs_list->scrollToItem(item);
+			SelectItem(item);
+			return true;
+		}
+	}
+	return false;
 }
 
 bool ConfigurationListWidget::HasValidGameDirectory() const {

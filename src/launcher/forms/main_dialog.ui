@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1120</width>
-    <height>700</height>
+    <width>1220</width>
+    <height>720</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>820</width>
-    <height>540</height>
+    <width>980</width>
+    <height>560</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -93,7 +93,7 @@
         <item>
          <widget class="QLabel" name="brand_subtitle_label">
           <property name="text">
-           <string>PlayStation 5 Translation Engine  ·  Windows 11 Hybrid P-Core &amp; Vulkan 1.3</string>
+           <string>PS5 Translation Engine  ·  Win11 P-Core &amp; Vulkan 1.3</string>
           </property>
          </widget>
         </item>
@@ -177,10 +177,29 @@
        </layout>
       </item>
       <item>
+       <widget class="QPushButton" name="razor_store_button">
+        <property name="minimumSize">
+         <size>
+          <width>172</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="toolTip">
+         <string>Open Razor Store — download &amp; auto-install PS5 homebrew games, tech demos, custom catalogs, and .zar/.zip packages directly into your Games folder</string>
+        </property>
+        <property name="text">
+         <string>✦  RAZOR STORE</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="launch_game_button">
         <property name="minimumSize">
          <size>
-          <width>156</width>
+          <width>172</width>
           <height>40</height>
          </size>
         </property>

@@ -4,8 +4,9 @@
 
 ![RazorEmulations — Gunmetal Grey Luxury Grid View](docs/preview_grid.png)
 ![RazorEmulations — Gunmetal Grey Luxury List View](docs/preview_list.png)
+![RazorEmulations — Built-in Razor Store & Auto-Install Hub](docs/preview_store.png)
 
-> **Legal Notice:** RazorEmulations is not affiliated with, endorsed by, or connected to Sony Interactive Entertainment LLC or PlayStation. No copyrighted firmware, BIOS, cryptographic keys, or game files are included or distributed. Use only legally obtained game dumps that you own.
+> **Legal Notice:** RazorEmulations is not affiliated with, endorsed by, or connected to Sony Interactive Entertainment LLC or PlayStation. No copyrighted firmware, BIOS, cryptographic keys, or commercial game files are included or distributed. Bundled Razor Store packages are 100% original open-source PS5 Prospero homebrew & hardware diagnostic titles. Use only legal homebrew or self-dumped backups of games you own.
 
 ---
 
@@ -28,9 +29,18 @@ Unlike a physical PS5 console locked to television EDID handshakes, **RazorEmula
 - **First-Responder VEH Page Tracking (`hostException.cpp`):** Registers the GPU `PageManager` Vectored Exception Handler with `First = 1` ahead of Vulkan ICD (`nvoglv64.dll`), NVIDIA NGX/DLSS, and third-party overlays.
 - **High-Address PE64 Base (`CMakeLists.txt`):** Anchors `clang-cl` / `lld-link` builds at `/BASE:0x100000000000` (16 TiB), keeping the host executable completely clear of all PS5 guest virtual address spaces.
 
-### 4. Gunmetal Grey Luxury Desktop Interface
+### 4. Built-In Razor Store & Zero-Setup Auto-Installer (`✦ RAZOR STORE`)
+- **Zero Manual Folder Configuration:** On first launch, `razor_launcher` automatically creates and registers a writable `Games/` library folder next to the emulator—no manual folder setup dialogs required.
+- **Playable Native 60-FPS PS5 Prospero Homebrew & Diagnostics Included (`store/`):**
+  - **`PPSA90001` — *Razor Cyber Breaker*:** Native PS5 Prospero 60 FPS VSync arcade brick-breaker with adaptive `1080p`/`1440p`/`4K` tiled surfaces, particle bursts, and DualSense controls.
+  - **`PPSA90002` — *Razor Neon Overdrive*:** Native PS5 Prospero 60 FPS synthwave pseudo-3D highway racer with 360 KM/H Nitrous overdrive and shield pickups.
+  - **`PPSA90003` — *Razor Hardware & Resolution Lab*:** Real-time `sceVideoOutGetOutputStatus` (`1080p` FHD / `1440p` WQHD / `4K` UHD) verifier, DualSense stick/trigger/lightbar visualizer, and 60 Hz frame-pacing suite.
+- **Universal `.zar` / `.zip` / `.tar.gz` / `.elf` One-Click Installer:** Paste any direct package URL, import a local archive, or add your own Custom Store `catalog.json` URL (including a personal LAN/NAS vault powered by `.\store\host_private_store.ps1`). Razor Store verifies SHA-256 checksums, safely unwraps nested folders, places packages straight into `Games/`, and refreshes your library automatically.
+- **No `PS5UPDATE.PUP` Required:** RazorEmulations uses High-Level Emulation (HLE) of PlayStation 5 system libraries (`libkernel`, `libSceVideoOut`, `libSceAgcDriver`, `libScePad`, `libSceAudioOut2`, `libSceUserService`, etc.) compiled directly into `razor_emulator`, so encrypted Sony `.PUP` firmware images are neither needed nor used.
+
+### 5. Gunmetal Grey Luxury Desktop Interface
 - Custom Qt 6 **Fusion** palette & stylesheet (`launcherTheme.cpp`, `launcher.qss`) crafted in brushed anodized gunmetal (`#12151A` / `#181C22` / `#232933`), platinum typography (`#ECF0F6`), and champagne-tungsten accents (`#C8A256`).
-- Instant header **PC Resolution Selector**, live VRAM/stability telemetry hint, one-click **`▶ LAUNCH GAME`** action button, translucent gunmetal game cards over PS5 hero art (`pic0.png`), and DualSense lightbar preview.
+- Instant header **PC Resolution Selector**, live VRAM/stability telemetry hint, one-click **`✦ RAZOR STORE`** and **`▶ LAUNCH GAME`** action buttons, translucent gunmetal game cards over PS5 hero art (`pic0.png`), and DualSense lightbar preview.
 
 ---
 
