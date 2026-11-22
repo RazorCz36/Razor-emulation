@@ -87,7 +87,7 @@ TEST(RazorStoreTests, ParsesBundledCatalogAndVerifiesProsperoZars) {
 	}
 }
 
-TEST(RazorStoreTests, RejectsMismatchedSha256AndUnwrapsNestedArchives) {
+TEST(RazorStoreTests, RejectsMismatchedSha256HtmlAndUnwrapsNestedArchivesWithContentId) {
 	QTemporaryDir temp;
 	ASSERT_TRUE(temp.isValid());
 
@@ -102,15 +102,28 @@ TEST(RazorStoreTests, RejectsMismatchedSha256AndUnwrapsNestedArchives) {
         QStringLiteral("0000000000000000000000000000000000000000000000000000000000000000"));
 	EXPECT_FALSE(bad_sha_res.ok);
 
-	// Build a nested .tar.gz archive (OuterWrapper/InnerGame/eboot.bin) without param.json
-	// and verify auto-unwrapping + automatic param.json generation!
+	// Reject HTML CAPTCHA page masquerading as a .zip archive:
+	const QString html_zip = QDir(temp.path()).filePath(QStringLiteral("captcha.zip"));
+	QFile         html_f(html_zip);
+	ASSERT_TRUE(html_f.open(QIODevice::WriteOnly));
+	html_f.write("<!DOCTYPE html><html><head><title>Solve CAPTCHA</title></head></html>");
+	html_f.close();
+	const auto html_res = RazorStore::InstallPackageToDirectory(html_zip, target_games);
+	EXPECT_FALSE(html_res.ok);
+
+	// Build a nested .tar.gz archive (Outer/InnerGame/eboot.bin + sce_sys/param.json with contentId)
 	const QString build_tree = QDir(temp.path()).filePath(QStringLiteral("pack_root"));
 	const QString inner_game = QDir(build_tree).filePath(QStringLiteral("Outer/MyHomebrew"));
-	ASSERT_TRUE(QDir().mkpath(inner_game));
+	ASSERT_TRUE(QDir().mkpath(QDir(inner_game).filePath(QStringLiteral("sce_sys"))));
 	QFile fake_eboot(QDir(inner_game).filePath(QStringLiteral("eboot.bin")));
 	ASSERT_TRUE(fake_eboot.open(QIODevice::WriteOnly));
 	fake_eboot.write("ELF_PAYLOAD");
 	fake_eboot.close();
+
+	QFile param_f(QDir(inner_game).filePath(QStringLiteral("sce_sys/param.json")));
+	ASSERT_TRUE(param_f.open(QIODevice::WriteOnly));
+	param_f.write(R"({"contentId": "ED5843-PPSA28319_00-XXXXXXXXXXXXXXXX", "contentVersion": "01.000.000"})");
+	param_f.close();
 
 	const QString archive_path = QDir(temp.path()).filePath(QStringLiteral("nested_homebrew.tar.gz"));
 	QProcess      tar_proc;
@@ -120,13 +133,115 @@ TEST(RazorStoreTests, RejectsMismatchedSha256AndUnwrapsNestedArchives) {
 	ASSERT_TRUE(tar_proc.waitForFinished(15000));
 	ASSERT_EQ(tar_proc.exitCode(), 0);
 
-	const auto nested_res = RazorStore::InstallPackageToDirectory(
-	    archive_path, target_games, QStringLiteral("PPSA90999"), QStringLiteral("Nested Homebrew"));
+	const auto nested_res =
+	    RazorStore::InstallPackageToDirectory(archive_path, target_games, {}, QStringLiteral("Ping Pong"));
 	ASSERT_TRUE(nested_res.ok) << nested_res.error_message.toStdString();
-	EXPECT_EQ(nested_res.title_id, QStringLiteral("PPSA90999"));
+	EXPECT_EQ(nested_res.title_id, QStringLiteral("PPSA28319"));
 	EXPECT_TRUE(QFileInfo::exists(QDir(nested_res.installed_path).filePath(QStringLiteral("eboot.bin"))));
-	EXPECT_TRUE(QFileInfo::exists(
-	    QDir(nested_res.installed_path).filePath(QStringLiteral("sce_sys/param.json"))));
+}
+
+TEST(RazorStoreTests, ParsesPs5LibraryProsperoStoreAndPegasusCatalogSchemas) {
+	// 1. Verify human size parser ("52GB", "700 MB", "12456020")
+	EXPECT_EQ(RazorStore::ParseSizeFieldToBytes(QStringLiteral("12456020")), 12456020ULL);
+	EXPECT_EQ(RazorStore::ParseSizeFieldToBytes(QStringLiteral("700 MB")),
+	          700ULL * 1024ULL * 1024ULL);
+	EXPECT_EQ(RazorStore::ParseSizeFieldToBytes(QStringLiteral("52GB")),
+	          52ULL * 1024ULL * 1024ULL * 1024ULL);
+
+	// 2. Verify deox1111/ps5-library "entries" catalog schema (including multi-part & console image detection)
+	const QByteArray ps5_lib_json = R"JSON({
+		"name": "My PS5 Library Vault",
+		"entries": [
+			{
+				"id": "game-zip-1",
+				"title": "Cyber Arena (v1.04)",
+				"title_id": "PPSA01234",
+				"kind": "game",
+				"platform": "ps5",
+				"format": "7z",
+				"size": "2 GB",
+				"region": "EUR",
+				"firmware": "4.xx",
+				"cover": "https://example.com/cover.png",
+				"files": [
+					{"url": "https://mirror.example/PPSA01234.7z.001", "name": "PPSA01234.7z.001"},
+					{"url": "https://mirror.example/PPSA01234.7z.002", "name": "PPSA01234.7z.002"}
+				]
+			},
+			{
+				"id": "console-only-img",
+				"title": "Shadow Image",
+				"title_id": "PPSA09999",
+				"format": "ffpfsc",
+				"files": [{"url": "https://mirror.example/PPSA09999.ffpfsc"}]
+			},
+			{
+				"title": "Skipped PS4 Entry",
+				"platform": "ps4",
+				"files": [{"url": "https://mirror.example/CUSA00001.pkg"}]
+			}
+		]
+	})JSON";
+
+	QString                 lib_name;
+	QVector<RazorStoreItem> lib_items;
+	QString                 err;
+	ASSERT_TRUE(RazorStore::ParseCatalogJson(ps5_lib_json, {}, &lib_name, &lib_items, &err))
+	    << err.toStdString();
+	EXPECT_EQ(lib_name, QStringLiteral("My PS5 Library Vault"));
+	ASSERT_EQ(lib_items.size(), 2);
+	EXPECT_EQ(lib_items[0].name, QStringLiteral("Cyber Arena"));
+	EXPECT_EQ(lib_items[0].version, QStringLiteral("1.04"));
+	EXPECT_EQ(lib_items[0].title_id, QStringLiteral("PPSA01234"));
+	EXPECT_EQ(lib_items[0].part_urls.size(), 2);
+	EXPECT_FALSE(lib_items[0].console_only_format);
+	EXPECT_TRUE(lib_items[1].console_only_format);
+
+	// 3. Verify ProsperoStore / darkxex/ps5-homebrew-catalog "apps" schema
+	const QByteArray prospero_json = R"({
+		"schema": 1,
+		"name": "PS5 Homebrew Catalog",
+		"apps": [
+			{
+				"titleid": "PPSA28319",
+				"name": "Middle Ages Ping Pong",
+				"kind": "game",
+				"category": "homebrew-games",
+				"author": "STL1te",
+				"version": "01.000.000",
+				"artifact_url": "https://github.com/STL1te/MedievalTennis/releases/download/01.000.000/PPSA28319.zip",
+				"sha256": "deadbeef",
+				"format": "zip"
+			},
+			{
+				"titleid": "PPSA99039",
+				"name": "Console Image App",
+				"kind": "app",
+				"format": "ffpfsc",
+				"artifact_url": "https://example.com/app.ffpfsc"
+			}
+		]
+	})";
+
+	QString                 prospero_name;
+	QVector<RazorStoreItem> prospero_items;
+	ASSERT_TRUE(
+	    RazorStore::ParseCatalogJson(prospero_json, {}, &prospero_name, &prospero_items, &err))
+	    << err.toStdString();
+	ASSERT_EQ(prospero_items.size(), 1);
+	EXPECT_EQ(prospero_items[0].title_id, QStringLiteral("PPSA28319"));
+	EXPECT_EQ(prospero_items[0].icon_url,
+	          QStringLiteral("https://prosperostore.net/api/v1/icons/PPSA28319-256.png"));
+
+	// 4. Verify Pegasus DL "packages" + "sources" schemas
+	const QByteArray pegasus_sources = R"({
+		"name": "My Source List",
+		"sources": ["https://example.com/cat1.json", {"url": "https://example.com/cat2.json", "enabled": true}]
+	})";
+	QStringList nested_urls;
+	ASSERT_TRUE(RazorStore::ParseCatalogJson(pegasus_sources, {}, &lib_name, &lib_items, &err,
+	                                         &nested_urls));
+	EXPECT_EQ(nested_urls.size(), 2);
 }
 
 int main(int argc, char** argv) {

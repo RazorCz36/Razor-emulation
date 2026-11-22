@@ -23,24 +23,29 @@ public:
 };
 
 struct RazorStoreItem {
-	QString  title_id;
-	QString  name;
-	QString  subtitle;
-	QString  category;
-	QString  version;
-	QString  author;
-	QString  license;
-	QString  resolutions;
-	QString  controls;
-	QString  description;
-	QString  format; // "zar", "zip", "tar.gz", "elf"
-	uint64_t size_bytes = 0;
-	QString  sha256;
-	QString  download_url;
-	QString  local_fallback_path;
-	QString  icon_url;
-	QString  local_icon_path;
-	QString  source_name;
+	QString     entry_id;
+	QString     title_id;
+	QString     name;
+	QString     subtitle;
+	QString     category;
+	QString     version;
+	QString     author;
+	QString     license;
+	QString     resolutions;
+	QString     controls;
+	QString     description;
+	QString     format; // "zar", "zip", "7z", "tar.gz", "elf", etc.
+	uint64_t    size_bytes = 0;
+	QString     sha256;
+	QString     download_url;
+	QStringList part_urls;
+	QStringList part_names;
+	QString     local_fallback_path;
+	QString     icon_url;
+	QString     local_icon_path;
+	QString     source_name;
+	QString     source_kind; // "razor", "prospero", "custom"
+	bool        console_only_format = false;
 };
 
 struct RazorStoreInstallResult {
@@ -54,9 +59,12 @@ namespace RazorStore {
 
 [[nodiscard]] QString LocateBundledStoreDir();
 
+[[nodiscard]] uint64_t ParseSizeFieldToBytes(const QString& size_text);
+
 [[nodiscard]] bool ParseCatalogJson(const QByteArray& json_bytes, const QString& base_dir,
                                     QString* out_store_name, QVector<RazorStoreItem>* out_items,
-                                    QString* out_error = nullptr);
+                                    QString* out_error = nullptr,
+                                    QStringList* out_nested_source_urls = nullptr);
 
 [[nodiscard]] RazorStoreInstallResult InstallPackageToDirectory(
     const QString& source_package_path, const QString& target_games_dir,
